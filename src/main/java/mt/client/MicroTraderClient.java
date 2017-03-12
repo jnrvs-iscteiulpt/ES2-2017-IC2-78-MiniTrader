@@ -11,6 +11,9 @@ import mt.comm.ClientComm;
  *
  */
 
+
+// Jenkins Test 
+
 public interface MicroTraderClient {
 
 	/**
