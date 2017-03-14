@@ -28,7 +28,7 @@ import mt.filter.AnalyticsFilter;
  *
  */
 
-//This comment is only for delivery purposes  
+//This comment is only for delivery purposes
 
 public class MicroServer implements MicroTraderServer {
 	
