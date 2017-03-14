@@ -27,6 +27,9 @@ import mt.filter.AnalyticsFilter;
  * @author Group 78
  *
  */
+
+//This comment is only for delivery purposes  
+
 public class MicroServer implements MicroTraderServer {
 	
 	public static void main(String[] args) {
@@ -365,10 +368,4 @@ public class MicroServer implements MicroTraderServer {
 			}
 		}
 	}
-	
-	// This comment is only for delivery purposes  
-	
-	
-	
-
 }
