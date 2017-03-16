@@ -28,8 +28,6 @@ import mt.filter.AnalyticsFilter;
  *
  */
 
-//This comment is only for delivery purposes
-
 public class MicroServer implements MicroTraderServer {
 	
 	public static void main(String[] args) {
