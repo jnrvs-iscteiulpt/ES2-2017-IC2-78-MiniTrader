@@ -125,7 +125,7 @@ public class MicroServer implements MicroTraderServer {
 				try {
 					verifyUserConnected(msg);
 
-					if(msg.getOrder().isSellOrder() && verifyIfSellOrderIsPermited(msg.getSenderNickname())){
+					if(verifyIfSellOrderIsPermited(msg.getSenderNickname())){
 						if(msg.getOrder().getNumberOfUnits()>10){
 							if(msg.getOrder().getServerOrderID() == EMPTY){
 								msg.getOrder().setServerOrderID(id++);
