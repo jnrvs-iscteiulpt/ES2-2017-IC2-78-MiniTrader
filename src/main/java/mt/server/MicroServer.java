@@ -20,10 +20,10 @@ import mt.comm.impl.ServerCommImpl;
 import mt.exception.ServerException;
 import mt.filter.AnalyticsFilter;
 
-
 import java.io.File;
 import java.io.FileOutputStream;
 
+import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -124,11 +124,17 @@ public class MicroServer implements MicroTraderServer {
 			case NEW_ORDER:
 				try {
 					verifyUserConnected(msg);
-					if(msg.getOrder().getServerOrderID() == EMPTY){
-						msg.getOrder().setServerOrderID(id++);
+					if(msg.getOrder().getNumberOfUnits()>10){
+						if(msg.getOrder().getServerOrderID() == EMPTY){
+							msg.getOrder().setServerOrderID(id++);
+						}
+						notifyAllClients(msg.getOrder());
+						processNewOrder(msg);
 					}
-					notifyAllClients(msg.getOrder());
-					processNewOrder(msg);
+					else {
+						serverComm.sendError(msg.getSenderNickname(), " The order quantity can never be lower than 10 units.");
+
+					}
 				} catch (ServerException e) {
 					serverComm.sendError(msg.getSenderNickname(), e.getMessage());
 				}
@@ -242,11 +248,9 @@ public class MicroServer implements MicroTraderServer {
 		LOGGER.log(Level.INFO, "Processing new order...");
 
 		Order o = msg.getOrder();
-		
 
 		// save the order on map
 		saveOrder(o);
-
 		// if is buy order
 		if (o.isBuyOrder()) {
 			saveOrderXML(o, "Buy");
@@ -302,7 +306,7 @@ public class MicroServer implements MicroTraderServer {
 			newElementOrder.setAttribute("Units", String.valueOf(o.getNumberOfUnits()));
 			newElementOrder.setAttribute("Price", String.valueOf(o.getPricePerUnit()));
 
-			
+
 
 			// Add new node to XML document root element
 			System.out.println("----- Adding new element to root element -----");
