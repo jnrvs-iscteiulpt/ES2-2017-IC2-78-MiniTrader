@@ -124,17 +124,19 @@ public class MicroServer implements MicroTraderServer {
 			case NEW_ORDER:
 				try {
 					verifyUserConnected(msg);
-					if(msg.getOrder().getNumberOfUnits()>10){
-					if(msg.getOrder().getServerOrderID() == EMPTY){
-						msg.getOrder().setServerOrderID(id++);
+					if(msg.getOrder().isSellOrder() && verifyIfSellOrderIsPermited(msg.getSenderNickname())){
+						if(msg.getOrder().getNumberOfUnits()>10){
+							if(msg.getOrder().getServerOrderID() == EMPTY){
+								msg.getOrder().setServerOrderID(id++);
+							}
+							notifyAllClients(msg.getOrder());
+							processNewOrder(msg);
+						}
+						//					else {
+						//						serverComm.sendError(msg.getOrder().getNickname(), "the order quantity can never be lower than 10 units .");
+						//
+						//					}
 					}
-					notifyAllClients(msg.getOrder());
-					processNewOrder(msg);
-					}
-//					else {
-//						serverComm.sendError(msg.getOrder().getNickname(), "the order quantity can never be lower than 10 units .");
-//
-//					}
 				} catch (ServerException e) {
 					serverComm.sendError(msg.getSenderNickname(), e.getMessage());
 				}
@@ -406,22 +408,6 @@ public class MicroServer implements MicroTraderServer {
 			Document doc = dBuilder.parse(inputFile);
 			doc.getDocumentElement().normalize();         
 
-			//			System.out.println("----- Search the tree with xpath queries -----");  
-			//			// Query 1 
-			//			XPathFactory xpathFactory = XPathFactory.newInstance();
-			//			XPath xpath = xpathFactory.newXPath();
-			//			XPathExpression expr = xpath.compile("/XML/Order[@Id='2']/@*");
-			//			NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-			//			System.out.print("Order ");
-			//			for (int i = 0; i < nl.getLength(); i++) {
-			//				System.out.print(nl.item(i).getNodeName()  + ":");
-			//				System.out.print(nl.item(i).getFirstChild().getNodeValue()  + " ");
-			//			}
-			//			// Query 2
-			//			expr = xpath.compile("/XML/Order[@Id='2']/Customer");
-			//			String str = (String) expr.evaluate(doc, XPathConstants.STRING);
-			//			System.out.println();System.out.println("Customer of Order Id=5: " + str);
-
 			// Create new element Order with attributes
 			Element newElementOrder = doc.createElement("Order");
 			newElementOrder.setAttribute("Id", String.valueOf(order.getServerOrderID()));
@@ -437,9 +423,9 @@ public class MicroServer implements MicroTraderServer {
 			newElementOrder.appendChild(newElementCustomer);
 
 			// Add new node to XML document root element
-			//			System.out.println("----- Adding new element to root element -----");
-			//			System.out.println("Root element :" + doc.getDocumentElement().getNodeName());         
-			//			System.out.println("Add Order Id='5' Type='Buy' Stock='PT' Units='15' Price='20'");
+			System.out.println("----- Adding new element to root element -----");
+			System.out.println("Root element :" + doc.getDocumentElement().getNodeName());         
+			System.out.println("Add Order Id='" +  String.valueOf(order.getServerOrderID()) + "' Type='" + type + "' Stock='" + order.getStock() + "' Units='" + String.valueOf(order.getNumberOfUnits()) + "' Price='"+ String.valueOf(order.getPricePerUnit()) + "'");
 			Node n = doc.getDocumentElement();
 			n.appendChild(newElementOrder);
 			// Save XML document
@@ -452,4 +438,20 @@ public class MicroServer implements MicroTraderServer {
 		} catch (Exception e) { e.printStackTrace(); }
 	}
 
+
+	private boolean verifyIfSellOrderIsPermited(String nickname) {
+		int unfulfilledOrdes = 0;
+		for(Order o : orderMap.get(nickname)) {
+			if(o.isSellOrder()) {
+				unfulfilledOrdes++;
+			}
+		}
+		if(unfulfilledOrdes == 5) {
+			return false;
+		} else {
+			return true;
+		}
+
+
+	}
 }
