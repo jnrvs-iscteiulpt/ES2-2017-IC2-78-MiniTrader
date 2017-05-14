@@ -20,10 +20,10 @@ import mt.comm.impl.ServerCommImpl;
 import mt.exception.ServerException;
 import mt.filter.AnalyticsFilter;
 
-
 import java.io.File;
 import java.io.FileOutputStream;
 
+import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -124,14 +124,20 @@ public class MicroServer implements MicroTraderServer {
 			case NEW_ORDER:
 				try {
 					verifyUserConnected(msg);
-					if(verifyIfSellOrderIsPermited(msg.getSenderNickname())){
-						if(msg.getOrder().getServerOrderID() == EMPTY){
-							msg.getOrder().setServerOrderID(id++);
-						}
 
-						notifyAllClients(msg.getOrder());
-						processNewOrder(msg);
+					if(msg.getOrder().isSellOrder() && verifyIfSellOrderIsPermited(msg.getSenderNickname())){
+						if(msg.getOrder().getNumberOfUnits()>10){
+							if(msg.getOrder().getServerOrderID() == EMPTY){
+								msg.getOrder().setServerOrderID(id++);
+							}
+
+
+
+							notifyAllClients(msg.getOrder());
+							processNewOrder(msg);
+						}
 					}
+
 				} catch (ServerException e) {
 					serverComm.sendError(msg.getSenderNickname(), e.getMessage());
 				}
@@ -247,10 +253,8 @@ public class MicroServer implements MicroTraderServer {
 		Order o = msg.getOrder();
 
 
-
 		// save the order on map
 		saveOrder(o);
-
 		// if is buy order
 		if (o.isBuyOrder()) {
 			saveOrderXML(o, "Buy");
