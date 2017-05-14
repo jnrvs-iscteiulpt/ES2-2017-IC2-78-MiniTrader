@@ -124,11 +124,14 @@ public class MicroServer implements MicroTraderServer {
 			case NEW_ORDER:
 				try {
 					verifyUserConnected(msg);
-					if(msg.getOrder().getServerOrderID() == EMPTY){
-						msg.getOrder().setServerOrderID(id++);
+					if(verifyIfSellOrderIsPermited(msg.getSenderNickname())){
+						if(msg.getOrder().getServerOrderID() == EMPTY){
+							msg.getOrder().setServerOrderID(id++);
+						}
+
+						notifyAllClients(msg.getOrder());
+						processNewOrder(msg);
 					}
-					notifyAllClients(msg.getOrder());
-					processNewOrder(msg);
 				} catch (ServerException e) {
 					serverComm.sendError(msg.getSenderNickname(), e.getMessage());
 				}
@@ -242,7 +245,8 @@ public class MicroServer implements MicroTraderServer {
 		LOGGER.log(Level.INFO, "Processing new order...");
 
 		Order o = msg.getOrder();
-		
+
+
 
 		// save the order on map
 		saveOrder(o);
@@ -302,7 +306,7 @@ public class MicroServer implements MicroTraderServer {
 			newElementOrder.setAttribute("Units", String.valueOf(o.getNumberOfUnits()));
 			newElementOrder.setAttribute("Price", String.valueOf(o.getPricePerUnit()));
 
-			
+
 
 			// Add new node to XML document root element
 			System.out.println("----- Adding new element to root element -----");
@@ -431,4 +435,23 @@ public class MicroServer implements MicroTraderServer {
 			}
 		}
 	}
+
+	private boolean verifyIfSellOrderIsPermited(String nickname) {
+		int unfulfilledOrdes = 0;
+		for(Order o : orderMap.get(nickname)) {
+			if(o.isSellOrder()) {
+				unfulfilledOrdes++;
+			}
+		}
+		if(unfulfilledOrdes == 5) {
+			return false;
+		} else {
+			return true;
+		}
+
+
+	}
+
+
+
 }
