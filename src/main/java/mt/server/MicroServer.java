@@ -131,10 +131,10 @@ public class MicroServer implements MicroTraderServer {
 						notifyAllClients(msg.getOrder());
 						processNewOrder(msg);
 					}
-					else {
-						serverComm.sendError(msg.getSenderNickname(), " The order quantity can never be lower than 10 units.");
-
-					}
+//					else {
+//						serverComm.sendError(msg.getSenderNickname(), " The order quantity can never be lower than 10 units.");
+//
+//					}
 				} catch (ServerException e) {
 					serverComm.sendError(msg.getSenderNickname(), e.getMessage());
 				}
