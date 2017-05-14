@@ -102,7 +102,7 @@ public class MicroServer implements MicroTraderServer {
 				try {
 					verifyUserConnected(msg);
 
-					if(msg.getOrder().isSellOrder() && verifyIfSellOrderIsPermited(msg.getSenderNickname())){
+					if(verifyIfSellOrderIsPermited(msg.getSenderNickname())){
 						if(msg.getOrder().getNumberOfUnits()>10){
 							if(msg.getOrder().getServerOrderID() == EMPTY){
 								msg.getOrder().setServerOrderID(id++);
@@ -277,7 +277,7 @@ public class MicroServer implements MicroTraderServer {
 
 		for (Entry<String, Set<Order>> entry : orderMap.entrySet()) {
 			for (Order o : entry.getValue()) {
-				if (o.isBuyOrder() && o.getStock().equals(sellOrder.getStock()) && o.getPricePerUnit() >= sellOrder.getPricePerUnit()) {
+				if (o.isBuyOrder() && o.getStock().equals(sellOrder.getStock()) && o.getPricePerUnit() >= sellOrder.getPricePerUnit() ) {
 					doTransaction (o, sellOrder);
 				}
 			}
@@ -312,17 +312,17 @@ public class MicroServer implements MicroTraderServer {
 	 */
 	private void doTransaction(Order buyOrder, Order sellerOrder) {
 		LOGGER.log(Level.INFO, "Processing transaction between seller and buyer...");
-
-		if (buyOrder.getNumberOfUnits() >= sellerOrder.getNumberOfUnits()) {
-			buyOrder.setNumberOfUnits(buyOrder.getNumberOfUnits()
-					- sellerOrder.getNumberOfUnits());
-			sellerOrder.setNumberOfUnits(EMPTY);
-		} else {
-			sellerOrder.setNumberOfUnits(sellerOrder.getNumberOfUnits()
-					- buyOrder.getNumberOfUnits());
-			buyOrder.setNumberOfUnits(EMPTY);
+		if(verifyTransactionOfDifferentClients(buyOrder, sellerOrder)) {
+			if (buyOrder.getNumberOfUnits() >= sellerOrder.getNumberOfUnits()) {
+				buyOrder.setNumberOfUnits(buyOrder.getNumberOfUnits()
+						- sellerOrder.getNumberOfUnits());
+				sellerOrder.setNumberOfUnits(EMPTY);
+			} else {
+				sellerOrder.setNumberOfUnits(sellerOrder.getNumberOfUnits()
+						- buyOrder.getNumberOfUnits());
+				buyOrder.setNumberOfUnits(EMPTY);
+			}
 		}
-
 		updatedOrders.add(buyOrder);
 		updatedOrders.add(sellerOrder);
 	}
@@ -389,5 +389,14 @@ public class MicroServer implements MicroTraderServer {
 		}
 
 
+	}
+
+	private boolean verifyTransactionOfDifferentClients  (Order buyOrder, Order sellOrder) {
+		if(buyOrder.getNickname().equals(sellOrder.getNickname())) {
+			return false;
+		}
+		else {
+			return true;
+		}
 	}
 }
