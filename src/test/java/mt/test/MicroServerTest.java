@@ -61,6 +61,9 @@ public class MicroServerTest {
 	@Mock
 	private ServerSideMessage msg11;
 	
+	@Mock
+	private ServerSideMessage msg12;
+	
 	@Before
 	public void setup(){
 		ms = new MicroServer();
@@ -103,7 +106,15 @@ public class MicroServerTest {
 	
 		when(msg10.getType()).thenReturn(Type.NEW_ORDER);
 		when(msg10.getOrder()).thenReturn(null);
-		when(msg10.getSenderNickname()).thenReturn("userA");	
+		when(msg10.getSenderNickname()).thenReturn("userA");
+		
+		when(msg11.getType()).thenReturn(Type.NEW_ORDER);
+		when(msg11.getOrder()).thenReturn(Order.createSellOrder("userA", "MSFT", 20, 20.0));
+		when(msg11.getSenderNickname()).thenReturn("userA");
+		
+		when(msg12.getType()).thenReturn(Type.NEW_ORDER);
+		when(msg12.getOrder()).thenReturn(Order.createBuyOrder("userB", "MSFT", 15, 21.0));
+		when(msg12.getSenderNickname()).thenReturn("userB");
 		
 		
 	}
@@ -127,8 +138,9 @@ public class MicroServerTest {
 		
 		ms.start(serverComm);
 		
-		verify(serverComm, atLeastOnce()).sendOrder("userB", Order.createSellOrder("userA", "MSFT", 5, 20.0) );
-		verify(serverComm, atLeastOnce()).sendOrder("userB", Order.createBuyOrder("userB", "MSFT", 0, 21.0) );
+//		verify(serverComm, atLeastOnce()).sendOrder("userA", Order.createSellOrder("userA", "MSFT", 5, 20.0) );
+//		verify(serverComm, atLeastOnce()).sendOrder("userB", Order.createBuyOrder("userB", "MSFT", 0, 21.0) );
+		verify(serverComm, atLeastOnce()).sendError("userB", "The order quantity can never be lower than 10 units.");;
 	}
 	
 	@Test
@@ -169,7 +181,7 @@ public class MicroServerTest {
 	
 	@Test
 	public void testStartProcessBuyOrder() throws Exception {		
-		when(serverComm.getNextMessage()).thenReturn(msg1).thenReturn(msg2).thenReturn(msg3).thenReturn(msg4).thenReturn(msg5).thenReturn(msg6).thenReturn(null);
+		when(serverComm.getNextMessage()).thenReturn(msg1).thenReturn(msg11).thenReturn(msg3).thenReturn(msg12).thenReturn(msg5).thenReturn(msg6).thenReturn(null);
 		ms.start(serverComm);
 		
 		verify(serverComm, atLeastOnce()).sendOrder("userA", Order.createSellOrder("userA", "MSFT", 5, 20.0));
