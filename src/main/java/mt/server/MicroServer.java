@@ -396,6 +396,12 @@ public class MicroServer implements MicroTraderServer {
 			}
 		}
 	}
+	
+	/**
+	  * Saves an order in a persistent XML document
+	  * @param order
+	  * @param type
+	  */
 
 	private void saveOrderXML (Order order, String type) {
 		try {	
