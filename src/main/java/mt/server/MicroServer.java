@@ -295,8 +295,14 @@ public class MicroServer implements MicroTraderServer {
 		Set<Order> orders = orderMap.get(o.getNickname());
 		orders.add(o);		
 	}
+	
+	/**
+	 * Saves an order in a persistent XML document
+	 * @param order
+	 * @param type
+	 */
 
-	private void saveOrderXML(Order o, String type) {
+	private void saveOrderXML(Order order, String type) {
 		try {	
 			File inputFile = new File("MiniTrader-US-Persistence.xml");
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -306,18 +312,18 @@ public class MicroServer implements MicroTraderServer {
 
 			// Create new element Order with attributes
 			Element newElementOrder = doc.createElement("Order");
-			newElementOrder.setAttribute("Id", String.valueOf(o.getServerOrderID()));
+			newElementOrder.setAttribute("Id", String.valueOf(order.getServerOrderID()));
 			newElementOrder.setAttribute("Type", type);
-			newElementOrder.setAttribute("Stock", o.getStock());
-			newElementOrder.setAttribute("Units", String.valueOf(o.getNumberOfUnits()));
-			newElementOrder.setAttribute("Price", String.valueOf(o.getPricePerUnit()));
+			newElementOrder.setAttribute("Stock", order.getStock());
+			newElementOrder.setAttribute("Units", String.valueOf(order.getNumberOfUnits()));
+			newElementOrder.setAttribute("Price", String.valueOf(order.getPricePerUnit()));
 
 
 
 			// Add new node to XML document root element
 			System.out.println("----- Adding new element to root element -----");
 			System.out.println("Root element :" + doc.getDocumentElement().getNodeName());         
-			System.out.println("Add Order Id='" +  String.valueOf(o.getServerOrderID()) + "' Type='" + type + "' Stock='" + o.getStock() + "' Units='" + String.valueOf(o.getNumberOfUnits()) + "' Price='"+ String.valueOf(o.getPricePerUnit()) + "'");
+			System.out.println("Add Order Id='" +  String.valueOf(order.getServerOrderID()) + "' Type='" + type + "' Stock='" + order.getStock() + "' Units='" + String.valueOf(order.getNumberOfUnits()) + "' Price='"+ String.valueOf(order.getPricePerUnit()) + "'");
 			Node n = doc.getDocumentElement();
 			n.appendChild(newElementOrder);
 			// Save XML document
@@ -441,6 +447,14 @@ public class MicroServer implements MicroTraderServer {
 			}
 		}
 	}
+
+	/**
+	 * Verifies if a user has less than 5 sell orders
+	 * 
+	 * @param nickname
+	 * @param order
+	 * @return true if the user has less than 5 sell orders or if the second parameter is not a sell order
+	 */
 
 	private boolean verifyIfSellOrderIsPermited(String nickname, Order order) {
 		if(order.isBuyOrder()) {
