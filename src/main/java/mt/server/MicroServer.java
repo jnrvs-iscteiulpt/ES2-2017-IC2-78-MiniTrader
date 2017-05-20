@@ -375,6 +375,14 @@ public class MicroServer implements MicroTraderServer {
 		}
 	}
 
+	/**
+	  * Verifies if a user has less than 5 sell orders
+	  * 
+	  * @param nickname
+	  * @param order
+	  * @return true if the user has less than 5 sell orders or if the second parameter is not a sell order
+	  */
+	
 	private boolean verifyIfSellOrderIsPermited(String nickname, Order order) {
 		if(order.isBuyOrder()) {
 			return true;
@@ -393,6 +401,13 @@ public class MicroServer implements MicroTraderServer {
 			}
 		}
 	}
+	
+	/**
+	 * Verifies if the client of a buy order is the same of sell order
+	 * @param buyOrder
+	 * @param sellOrder
+	 * @return true if the clients are different and false is they are the same
+	 */
 
 	private boolean verifyTransactionOfDifferentClients  (Order buyOrder, Order sellOrder) {
 		if(buyOrder.getNickname().equals(sellOrder.getNickname())) {
