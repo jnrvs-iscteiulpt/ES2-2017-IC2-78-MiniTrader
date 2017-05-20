@@ -125,8 +125,8 @@ public class MicroServer implements MicroTraderServer {
 				try {
 					verifyUserConnected(msg);
 
-					if(verifyIfSellOrderIsPermited(msg.getSenderNickname())){
-						if(msg.getOrder().getNumberOfUnits()>10){
+					if(verifyIfSellOrderIsPermited(msg.getSenderNickname(), msg.getOrder())){
+						if(msg.getOrder().getNumberOfUnits()>=10){
 							if(msg.getOrder().getServerOrderID() == EMPTY){
 								msg.getOrder().setServerOrderID(id++);
 							}
@@ -135,6 +135,8 @@ public class MicroServer implements MicroTraderServer {
 
 							notifyAllClients(msg.getOrder());
 							processNewOrder(msg);
+						} else {
+							serverComm.sendError(msg.getSenderNickname(), "The order quantity can never be lower than 10 units.");
 						}
 					}
 
@@ -440,20 +442,23 @@ public class MicroServer implements MicroTraderServer {
 		}
 	}
 
-	private boolean verifyIfSellOrderIsPermited(String nickname) {
-		int unfulfilledOrdes = 0;
-		for(Order o : orderMap.get(nickname)) {
-			if(o.isSellOrder()) {
-				unfulfilledOrdes++;
+	private boolean verifyIfSellOrderIsPermited(String nickname, Order order) {
+		if(order.isBuyOrder()) {
+			return true;
+		} else {
+			int unfulfilledOrdes = 0;
+			for(Order o : orderMap.get(nickname)) {
+				if(o.isSellOrder()) {
+					unfulfilledOrdes++;
+				}
+			}
+			if(unfulfilledOrdes == 5) {
+				serverComm.sendError(order.getNickname(), "You have reached the maximum number of sellOrders permitted"); 
+				return false;
+			} else {
+				return true;
 			}
 		}
-		if(unfulfilledOrdes == 5) {
-			return false;
-		} else {
-			return true;
-		}
-
-
 	}
 
 
